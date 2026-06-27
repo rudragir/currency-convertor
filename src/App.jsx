@@ -4,15 +4,7 @@ import useCurrencyInfo from "./hooks/useCurrencyInfo";
 import Ticker from "./components/Ticker";
 import "./App.css";
 
-function App() {
-  const [amount, setAmount] = useState("");
-  const [from, setFrom] = useState("usd");
-  const [to, setTo] = useState("inr");
-  const [convertedAmount, setConvertedAmount] = useState("");
-
-  const CurrencyInfo = useCurrencyInfo(from);
-  const options = Object.keys(CurrencyInfo || {});
-
+function ConverterForm({ amount, setAmount, from, setFrom, to, setTo, convertedAmount, setConvertedAmount, CurrencyInfo, options }) {
   const swap = () => {
     setFrom(to);
     setTo(from);
@@ -26,21 +18,124 @@ function App() {
   };
 
   return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        convert();
+      }}
+    >
+
+      <div className="">
+
+        <InputBox
+          label="From"
+          amount={amount}
+          onAmountChange={setAmount}
+          currencyOptions={options}
+          onCurrencyChange={setFrom}
+          selectCurrency={from}
+        />
+
+      </div>
+
+      <div className="relative h-4 border-b-2 border-lime-300 mb-4">
+
+        <button
+          type="button"
+          onClick={swap}
+          className="absolute left-1/2 -translate-x-1/2 -translate-y-1 border-2 border-lime-400 bg-violet-700 px-5 py-1 text-white font-semibold hover:bg-violet-600 transition"
+        >
+          SWAP
+        </button>
+
+      </div>
+
+      <div className="mt-2 mb-5">
+
+        <InputBox
+          label="To"
+          amount={convertedAmount}
+          currencyOptions={options}
+          onCurrencyChange={setTo}
+          selectCurrency={to}
+          amountDisable
+        />
+
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-violet-700 hover:bg-violet-500 hover:text-fuchsia-950 transition text-white py-3 rounded-lg font-bold"
+      >
+        Convert {from.toUpperCase()} → {to.toUpperCase()}
+      </button>
+
+    </form>
+  );
+}
+
+function App() {
+  const [amount, setAmount] = useState("");
+  const [from, setFrom] = useState("usd");
+  const [to, setTo] = useState("inr");
+  const [convertedAmount, setConvertedAmount] = useState("");
+
+  const CurrencyInfo = useCurrencyInfo(from);
+  const options = Object.keys(CurrencyInfo || {});
+
+  const formProps = { amount, setAmount, from, setFrom, to, setTo, convertedAmount, setConvertedAmount, CurrencyInfo, options };
+
+  return (
     <div className="min-h-screen flex flex-col">
 
       {/* ---------------- Ticker ---------------- */}
 
       <Ticker />
 
-      {/* ---------------- Main Content ---------------- */}
+      {/* ---------------- Mobile Hero Banner (hidden on lg+) ---------------- */}
 
-      <div className="flex flex-1">
+      <div className="lg:hidden flex items-center gap-4 px-5 py-4 bg-violet-700 border-b-4 border-black">
+        <span className="text-5xl font-black text-white/20 leading-none select-none">$</span>
+        <div>
+          <p className="text-lime-300 text-xs font-bold tracking-widest uppercase">Live Exchange Rate</p>
+          <h1 className="text-2xl font-black text-white leading-tight">Currency App</h1>
+        </div>
+      </div>
+
+      {/* ---------------- Mobile Converter (hidden on lg+) ---------------- */}
+
+      <div
+        className="lg:hidden flex-1 flex items-start justify-center bg-black px-4 py-8"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(163,230,53,0.12) 4px, transparent 1px),
+            linear-gradient(90deg, rgba(163,230,53,0.12) 1px, transparent 1px)
+          `,
+          backgroundSize: "50px 50px",
+        }}
+      >
+
+        <div className="relative w-full max-w-sm rounded-xl border-4 border-lime-400 p-6 pt-7 backdrop-blur-md bg-white/5">
+
+          <div className="absolute -top-4 left-6 bg-lime-400 px-4 py-1 font-mono font-bold text-black rounded">
+            Currency Converter
+          </div>
+
+          <ConverterForm {...formProps} />
+
+        </div>
+
+      </div>
+
+      {/* ---------------- Main Content (hidden on mobile, flex on lg+) ---------------- */}
+
+      <div className="hidden lg:flex flex-1">
 
         {/* ---------------- Left Hero ---------------- */}
 
         <div className="w-1/4 flex items-center justify-center ">
 
-          <div className="relative overflow-hidden m-6 p-8 rounded-[32px] flex flex-col justify-center h-[500px] border-4 border-black bg-violet-700 text-purple-100">
+          <div className="relative overflow-hidden m-6 p-8 rounded-32px flex flex-col justify-center h-500px border-4 border-black bg-violet-700 text-purple-100">
 
             <p className="text-lime-300 font-bold tracking-widest uppercase">
               Live Exchange Rate
@@ -101,59 +196,7 @@ function App() {
               Currency Converter
             </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                convert();
-              }}
-            >
-
-              <div className="">
-
-                <InputBox
-                  label="From"
-                  amount={amount}
-                  onAmountChange={setAmount}
-                  currencyOptions={options}
-                  onCurrencyChange={setFrom}
-                  selectCurrency={from}
-                />
-
-              </div>
-
-              <div className="relative h-4 border-b-2 border-lime-300 mb-4">
-
-                <button
-                  type="button"
-                  onClick={swap}
-                  className="absolute left-1/2 -translate-x-1/2 -translate-y-1 border-2 border-lime-400 bg-violet-700 px-5 py-1 text-white font-semibold hover:bg-violet-600 transition"
-                >
-                  SWAP
-                </button>
-
-              </div>
-
-              <div className="mt-2 mb-5">
-
-                <InputBox
-                  label="To"
-                  amount={convertedAmount}
-                  currencyOptions={options}
-                  onCurrencyChange={setTo}
-                  selectCurrency={to}
-                  amountDisable
-                />
-
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-violet-700 hover:bg-violet-500 hover:text-fuchsia-950 transition transition text-white py-3 rounded-lg font-bold"
-              >
-                Convert {from.toUpperCase()} → {to.toUpperCase()}
-              </button>
-
-            </form>
+            <ConverterForm {...formProps} />
 
           </div>
 
